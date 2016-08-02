@@ -1,0 +1,44 @@
+CC = i586-mingw32msvc-gcc
+LD = i586-mingw32msvc-gcc
+AR = i586-mingw32msvc-ar rcs
+
+CPPFLAGS = -g -Wall -Werror -D_FILE_OFFSET_BITS=64 -I. -I ../gnuwin32/include
+LDFLAGS = -g -L../gnuwin32/lib
+
+SOURCE_LIST = \
+errors.c \
+lookupa.c \
+hashtab.c \
+recycle.c \
+mpq-bios.c \
+mpq-crypto.c \
+mpq-errors.c \
+mpq-file.c \
+mpq-fs.c \
+mpq-misc.c \
+stalloc.c \
+
+
+TARGET = mpqlib.dll
+
+
+OBJ_LIST = $(addsuffix .o, $(notdir $(basename $(SOURCE_LIST))))
+DEP_LIST = $(addsuffix .dep, $(notdir $(basename $(SOURCE_LIST))))
+
+all: dep $(TARGET)
+
+$(TARGET): $(OBJ_LIST)
+	$(LD) -shared -Wl,--output-def=mpqlib.def -Wl,--out-implib=mpqlib.a -o mpqlib.dll $(OBJ_LIST) -g -fexceptions -Wl,--enable-auto-image-base -Wl,--export-dynamic --export-all-symbols -Wl,--enable-auto-import -fexceptions -lz.dll $(LDFLAGS)
+
+test-it.exe: $(TARGET) test-it.o
+	$(LD) -o test-it.exe test-it.o $(TARGET) $(LDFLAGS)
+
+clean:
+	rm -f *.o *.dep $(TARGET) test-it.exe *.dll *.a
+
+dep: $(DEP_LIST)
+
+%.dep : %.c
+	$(CC) $(CPPFLAGS) -M -MF $@ $<
+
+-include $(DEP_LIST)

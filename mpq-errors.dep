@@ -1,0 +1,1 @@
+mpq-errors.o: mpq-errors.c mpq-errors.h errors.h
